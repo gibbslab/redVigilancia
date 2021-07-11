@@ -1,0 +1,31 @@
+Genomic features of type "ANY" loaded: 24
+reference chromosomes:
+	MN908947.3 (total length: 29903 bp, total length without N's: 29903 bp, maximal covered length: 29782 bp)
+
+total genome size: 29903
+
+gap min size: 50
+partial gene/operon min size: 100
+
+
+
+assembly                 | genome    | duplication | gaps      | genes     | partial   | operons   | partial   |
+                         | fraction  | ratio       | number    |           | genes     |           | operons   |
+========================================================================================================================
+SAMPLE_01_consensus      | 91.392    | 1.094       | 9         | 14        | 9         | -         | -         |
+SAMPLE_07_consensus      | 81.848    | 1.222       | 19        | 12        | 11        | -         | -         |
+SAMPLE_16_consensus      | 94.215    | 1.061       | 6         | 14        | 9         | -         | -         |
+SAMPLE_15_consensus      | 97.050    | 1.030       | 4         | 16        | 7         | -         | -         |
+SAMPLE_04_consensus      | 94.924    | 1.053       | 5         | 16        | 7         | -         | -         |
+SAMPLE_06_consensus      | 95.111    | 1.050       | 7         | 14        | 10        | -         | -         |
+SAMPLE_09_consensus      | 93.322    | 1.072       | 8         | 14        | 9         | -         | -         |
+SAMPLE_05_consensus      | 97.743    | 1.023       | 4         | 17        | 7         | -         | -         |
+SAMPLE_17_consensus      | 98.632    | 1.014       | 2         | 19        | 4         | -         | -         |
+SAMPLE_08_consensus      | 96.816    | 1.033       | 4         | 18        | 5         | -         | -         |
+SAMPLE_14_consensus      | 97.947    | 1.021       | 4         | 18        | 6         | -         | -         |
+SAMPLE_10_consensus      | 97.810    | 1.022       | 4         | 18        | 6         | -         | -         |
+SAMPLE_12_consensus      | 95.104    | 1.051       | 6         | 16        | 7         | -         | -         |
+SAMPLE_13_consensus      | 99.595    | 1.004       | 2         | 21        | 3         | -         | -         |
+SAMPLE_02_consensus      | 97.050    | 1.030       | 4         | 16        | 7         | -         | -         |
+SAMPLE_11_consensus      | 98.070    | 1.019       | 4         | 17        | 7         | -         | -         |
+SAMPLE_03_consensus      | 95.683    | 1.045       | 3         | 17        | 6         | -         | -         |
