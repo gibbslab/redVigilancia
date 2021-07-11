@@ -161,7 +161,7 @@ do
   # the difference is that v is the file before stripping end of lines.
   rm -f ${tmpDir}/v
   rm -f ${tmpDir}/V
-
+  
   while read line
   do
    #Use -c to count number of matches. If == 1 means there was a match.
@@ -171,6 +171,12 @@ do
      
      # Here V file shouldn't be overwritten. So create "v" file.
      echo ${line}  >> ${tmpDir}/v  
+   
+   elif [ "$match" -eq 0 ];then
+    
+     #If there are no matches create the file with "NA"
+     echo "" >> ${tmpDir}/v
+   
    fi
   done < ${vocFile}
 
