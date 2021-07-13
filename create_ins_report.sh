@@ -26,10 +26,12 @@
 # V: Variants of interest
 # D: Mosdepth mean depth
 # F: Covered Genome Fraction 
-# 
-# The actual output order is: S C V I N A D F
+# K: Aminoacid deletion
+# R: Range of K  in the corresponding reference Nucleotide sequence.
 #
+# The actual output order is: S C V K R I N A D F
 #
+#  
 # How to run it: 
 # $> create_ins_report nextclade.json  variantsOfConcern.lst path_to_mosdepth_genome_dir quast_genome_info_file.txtx
 #
@@ -64,6 +66,22 @@ function input_error ()
   " 
   exit 0
 }
+
+
+function get_nr_list ()
+{
+
+  FILEA=$(mktemp tmp-XXX -p ./)
+  FILEB=$(mktemp tmp-ileXXX -p ./)
+  FILEC=$(mktemp tmp-fileXXX -p ./)
+  
+  cat $1 | sort  > $FILEA
+  uniq -u $FILEA > $FILEB   #Only lines that are not repeated
+  uniq -d $FILEA > $FILEC   #Only lines that are repeated.
+  cat $FILEB $FILEC | sort
+
+}
+
 
 
 if [ -z "$4" ]; then
@@ -114,6 +132,7 @@ resultsLength=$(jq '.results[] | length' ${jsonFile} | wc -l)
 #--------------------------------------------------------------------
 for (( i=0; i<$resultsLength; i++ ))
 do
+  
   
   # Get sample name
   # Sample name comes in the form: SAMPLE_01/ARTIC/medaka...
@@ -170,6 +189,7 @@ do
    if [ "$match" -eq 1 ];then
      
      # Here V file shouldn't be overwritten. So create "v" file.
+
      echo ${line}  >> ${tmpDir}/v  
    
    elif [ "$match" -eq 0 ];then
@@ -180,7 +200,63 @@ do
    fi
   done < ${vocFile}
 
+  #------------------ DELETIONS------------------
+  #             Retrieve  aaDeletions.
+  # Composed of two arrays. This is the general form:
+  # results[n]
+  #    |_deletions[1]
+  #      |_aaDeletions[n]
+  #
+  delLength=$(jq '.results['$i'].deletions | length' ${jsonFile})
   
+  #Run this ONLY  if there are deletions
+  if [ $delLength -gt 0 ];then
+    for (( j=0; j<$delLength; j++ ))
+    do
+
+      #Get  aaDeletions Length
+      aaDelLength=$(jq '.results['$i'].deletions['$j'].aaDeletions | length' ${jsonFile})
+
+      # Check if there are aminoacid deletions. If not put NA on the corresponding
+      # fields.
+      if [ $aaDelLength -eq 0 ];then
+        
+        aaDelNucBegin=$(echo "NA")
+        aaDelNucEnd=$(echo "NA")
+        
+      elif [ $aaDelLength -ne 0 ];then
+
+        for (( k=0; k<$aaDelLength; k++ ))
+        do
+
+          #Get the deletion itself. Something like: "ORF1a:S365-"
+          aaDel=$(jq '.results['$i'].deletions['$j'].aaDeletions['$k'] | .gene + ":" + .refAA + (.codon+1|tostring) + "-"'  ${jsonFile} | sed -e 's/\"//g')
+          
+          #Get start coordinate for deletion.
+          aaDelNucBegin=$(jq '.results['$i'].deletions['$j'].aaDeletions['$k'].contextNucRange.begin'  ${jsonFile})
+          
+          #Get end coordinate for deletion.
+          aaDelNucEnd=$(jq '.results['$i'].deletions['$j'].aaDeletions['$k'].contextNucRange.end'  ${jsonFile})
+          
+          #Get rid of line brakes for aaDel.
+          echo ${aaDel} | tr '\n' ' ' >> ${tmpDir}/K
+
+          
+          aaDelNucBegin=$(echo ${aaDelNucBegin} | tr  '\n' ' ' |  tr -d '[:space:]') 
+          aaDelNucEnd=$(echo ${aaDelNucEnd} | tr  '\n' ' ' | tr -d '[:space:]') 
+          
+          echo ${aaDelNucBegin}"-"${aaDelNucEnd} | tr '\n' ' ' >> ${tmpDir}/R
+      
+        done
+      fi 
+    done
+  elif [ $delLength -eq 0 ];then
+    
+    echo "NA" > ${tmpDir}/K
+    echo "NA" > ${tmpDir}/R
+    
+  fi #Ends $delLength gt 0
+
   #------------------------------------------------------------------
   # MOSDEPTH & QUAST ROUTINES
   # Retrieve mapped reads from mosdepth
@@ -208,16 +284,21 @@ do
   # V: Variants of interest
   # D: Mosdepth mean depth
   # F: Covered Genome Fraction 
+  # K: Aminoacid deletion
+  # R: Range of K  in the corresponding reference Nucleotide sequence.
   #
   #------------------------------------------------------------------
   cd ${tmpDir}
 
-  #Replace line breaks from V file.
+  #Replace line breaks from v file.
   cat v | tr '\n' ' '  > V
 
   #Paste does all the magic. Easy to modify columns position.
-  paste S C V I N A D F
+  #paste S C V K R I N A D F
+  paste S V K R I  
   
+ rm -f ${tmpDir}/K
+ rm -f ${tmpDir}/R
   #We need to get back one dir up.
   cd ..
   
