@@ -68,20 +68,6 @@ function input_error ()
 }
 
 
-function get_nr_list ()
-{
-
-  FILEA=$(mktemp tmp-XXX -p ./)
-  FILEB=$(mktemp tmp-ileXXX -p ./)
-  FILEC=$(mktemp tmp-fileXXX -p ./)
-  
-  cat $1 | sort  > $FILEA
-  uniq -u $FILEA > $FILEB   #Only lines that are not repeated
-  uniq -d $FILEA > $FILEC   #Only lines that are repeated.
-  cat $FILEB $FILEC | sort
-
-}
-
 
 
 if [ -z "$4" ]; then
@@ -105,17 +91,23 @@ if [ ! -f $4 ];then
 fi
 
 
+# Since this script outputs to STDOUT header lines has to be echoed
+# before enything into the loop. For new versions this behaviour can be changed
+# by an associative array  (ei. clade[C]) and sending output to a file.
+#Please note that each field here is tabulated.
+echo "Codigo:Linaje:Mutacion de interes:Delecion:Delecion(coordenadas):Inserciones:Sustituciones:Sustituciones(AA):Profundidad:Cobertura:Laboratorio" | tr ':' '\t'
 
 #--------------------------------------------------------------------
 # Input files
 #--------------------------------------------------------------------
+#Create a temp dir to hold tmp files
+tmpDir=$(mktemp -d -p ./)
+
+
 jsonFile=${1}
 vocFile=${2}
 mosDir=${3}
 quastFile=${4}
-
-#Create a temp dir to hold tmp files
-tmpDir=$(mktemp -d -p ./)
 
 #--------------------------------------------------------------------
 # Get the number of entries (A.K.A genomes analyzed, fields in array).
@@ -209,6 +201,10 @@ do
   #
   delLength=$(jq '.results['$i'].deletions | length' ${jsonFile})
   
+
+  rm -f ${tmpDir}/K
+  rm -f ${tmpDir}/R
+  
   #Run this ONLY  if there are deletions
   if [ $delLength -gt 0 ];then
     for (( j=0; j<$delLength; j++ ))
@@ -221,8 +217,8 @@ do
       # fields.
       if [ $aaDelLength -eq 0 ];then
         
-        aaDelNucBegin=$(echo "NA")
-        aaDelNucEnd=$(echo "NA")
+        echo "NA" > ${tmpDir}/K
+        echo "NA" > ${tmpDir}/R
         
       elif [ $aaDelLength -ne 0 ];then
 
@@ -286,19 +282,22 @@ do
   # F: Covered Genome Fraction 
   # K: Aminoacid deletion
   # R: Range of K  in the corresponding reference Nucleotide sequence.
-  #
+  # L: Laboratory that processed samples
   #------------------------------------------------------------------
+  
+  # Laboratory field.
+  echo "UNAL-Bogota" > ${tmpDir}/L
+  
   cd ${tmpDir}
 
   #Replace line breaks from v file.
   cat v | tr '\n' ' '  > V
 
-  #Paste does all the magic. Easy to modify columns position.
-  #paste S C V K R I N A D F
-  paste S V K R I  
   
- rm -f ${tmpDir}/K
- rm -f ${tmpDir}/R
+  #Paste does all the magic. Easy to modify columns position.
+  paste S C V K R I N A D F L
+  
+
   #We need to get back one dir up.
   cd ..
   
