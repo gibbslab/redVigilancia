@@ -14,6 +14,9 @@
 # 4) Path to quast info file.
 #
 # OUTPUT:
+
+# Outputs a tab separated file with the following content:
+#
 # S: Sample name
 # C: Clade
 # I: Insertions 
@@ -27,9 +30,13 @@
 #
 # The actual output order is: S C V K R I N A D F
 #
+# By default the output file is named as the input "json" file + "ins_report.tsv" 
+# So if the inpout file is named: nextclade.json the output file is named:
+# nextclade.json.ins_report.tsv
+#
 #  
 # How to run it: 
-# $> create_ins_report nextclade.json  variantsOfConcern.lst path_to_mosdepth_genome_dir quast_genome_info_file.txtx
+# $> create_ins_report nextclade.json  variantsOfConcern.lst path_to_mosdepth_genome_dir quast_genome_info_file
 #
 # IMPORTANT: Sorry not support for OSX yet in this script.
 #
