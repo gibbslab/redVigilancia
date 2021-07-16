@@ -1,0 +1,21 @@
+Some of the features to be upgradeed.
+== Support for OSX. ==
+Needs testing. But one of the first errors comes with "mktemp".
+
+== Create XLSX file  ==
+Options:
+https://github.com/pyexcel/pyexcel-cli
+https://gitlab.com/DerLinkshaender/csv2xlsx
+
+== Create separate internal report ==
+This report is intended for our use, basic statistics on
+most common variants found. % of strains etc.
+
+== Add context alignments to report ==
+I find useful to have context alignments in the form:
+ATTC-----
+A-TC-----
+in the spreadsheet.
+
+== Map OMS names to Pangolin names==
+Having a map table would help

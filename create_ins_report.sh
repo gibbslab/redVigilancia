@@ -14,9 +14,8 @@
 # 4) Path to quast info file.
 #
 # OUTPUT:
-# This script outputs to STDOUT, so redirect output to a desired file.
-# It outputs a single line for each sample. Each column corresponds to 
-# the following:
+
+# Outputs a tab separated file with the following content:
 #
 # S: Sample name
 # C: Clade
@@ -31,13 +30,17 @@
 #
 # The actual output order is: S C V K R I N A D F
 #
+# By default the output file is named as the input "json" file + "ins_report.tsv" 
+# So if the inpout file is named: nextclade.json the output file is named:
+# nextclade.json.ins_report.tsv
+#
 #  
 # How to run it: 
-# $> create_ins_report nextclade.json  variantsOfConcern.lst path_to_mosdepth_genome_dir quast_genome_info_file.txtx
+# $> create_ins_report nextclade.json  variantsOfConcern.lst path_to_mosdepth_genome_dir quast_genome_info_file
 #
 # IMPORTANT: Sorry not support for OSX yet in this script.
 #
-
+#
 
 #--------------------------------------------------------------------
 #
@@ -95,7 +98,6 @@ fi
 # before enything into the loop. For new versions this behaviour can be changed
 # by an associative array  (ei. clade[C]) and sending output to a file.
 #Please note that each field here is tabulated.
-echo "Codigo:Linaje:Mutacion de interes:Delecion:Delecion(coordenadas):Inserciones:Sustituciones:Sustituciones(AA):Profundidad:Cobertura:Laboratorio" | tr ':' '\t'
 
 #--------------------------------------------------------------------
 # Input files
@@ -109,6 +111,20 @@ vocFile=${2}
 mosDir=${3}
 quastFile=${4}
 
+# Name of the main report file to output.
+baseName=$(basename ${jsonFile})
+reportMainFile=$(echo ${tmpDir}/${baseName}".ins_report.tsv")
+
+
+# User feed back.
+echo ""
+echo ""
+echo "Creating output file: ${reportMainFile}"
+echo ""
+
+# Write header in output file
+echo "Codigo:Linaje:Mutacion de interes:Delecion:Delecion(coordenadas):Inserciones:Sustituciones:Sustituciones(AA):Profundidad:Cobertura:Laboratorio" | tr ':' '\t' > ${reportMainFile}
+
 #--------------------------------------------------------------------
 # Get the number of entries (A.K.A genomes analyzed, fields in array).
 # Nextclade json files has 4 initial objects. Last one (results) is an
@@ -116,7 +132,7 @@ quastFile=${4}
 # genomes analyzed.
 #--------------------------------------------------------------------
 resultsLength=$(jq '.results[] | length' ${jsonFile} | wc -l)
-
+echo "Found ${resultsLength} samples in input JSON file."
 
 #--------------------------------------------------------------------
 # Iterate through each object in array.
@@ -125,13 +141,13 @@ resultsLength=$(jq '.results[] | length' ${jsonFile} | wc -l)
 for (( i=0; i<$resultsLength; i++ ))
 do
   
-  
   # Get sample name
   # Sample name comes in the form: SAMPLE_01/ARTIC/medaka...
   # Let's use only the "SAMPLE_01" part for further consistency.
   # NOTE: This is true for the web version of the JSON file it is necessary to
   # check what de differences are with command line JSON file.
   sampleName=$(jq '.results['$i'].seqName' ${jsonFile} | sed -e 's/\"//g' | cut -d '/' -f 1)
+  echo "Analyzing sample ${i}: ${sampleName}"
   
   echo ${sampleName} > ${tmpDir}/S
   
@@ -295,9 +311,10 @@ do
 
   
   #Paste does all the magic. Easy to modify columns position.
-  paste S C V K R I N A D F L
+  # We have to give the relative path to the file because now we 
+  # are into the tmp folder.
+  paste S C V K R I N A D F L  >> ../${reportMainFile}
   
-
   #We need to get back one dir up.
   cd ..
   
@@ -305,7 +322,12 @@ do
   # echo "-----"
 
 done
+  
+#mv report file un dir up. So it is visible to user.
+mv ${reportMainFile} .
 
+echo "Al samples analyzed."
+echo "Cleaning up."
 
 #Cleaning up.
 rm -Rf ${tmpDir}
@@ -313,4 +335,5 @@ rm -Rf ${tmpDir}
 #Clean exit
 set GREP_OPTIONS
 
+echo "All done. Bye."
 exit 0
