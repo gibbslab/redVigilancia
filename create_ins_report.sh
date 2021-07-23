@@ -10,8 +10,7 @@
 # INPUT:
 # 1) Nextclade's output in .json format.
 # 2) A one column file holding a list of variants.
-# 3) Path to Mosdepth's "genome" (not "amplicon")dir, containing a single file for each sample.
-# 4) Path to quast info file.
+# 3) Path to nf-core/viralrecon results dir.
 #
 # OUTPUT:
 
@@ -53,18 +52,17 @@ function input_error ()
   #
   # ** ERROR **: ${1}
   # 
-  #  Please check that you provided 4 arguments and/or paths are correct.
+  #  Please check that you provided  all arguments and/or paths are correct.
   #
   #  This script requires the following input files:
   #
   #  1) A JSON file as obtained from NEXTCLADE.
   #  2) A one column file holding a list of Variants of Interest to look for.
-  #  3) A path to a directory containing mosdepth coverage results. 
-  #  4) Quast genome info file.
+  #  3) Path to nf-core/viralrecon results dir.
   #
   #  Example:
   #
-  #  create_ins_report.sh  [nextclade_output.json] [variants_file] [mosdepth-dir]  [quast-genome-info_file]
+  #  create_ins_report.sh  [nextclade_output.json] [variants_file] [nfcore_results_dir] 
   #
   " 
   exit 1
@@ -77,7 +75,7 @@ if ! [ -x "$(command -v jq)" ]; then
 fi
 
 
-if [ -z "$4" ]; then
+if [ -z "$3" ]; then
   input_error "Missing argument"
 fi
  
@@ -90,12 +88,9 @@ if [ ! -f $2 ];then
 fi
 
 if [ ! -d $3 ] || [ -z "$3" ];then
-  input_error "Mosdepth directory ${3} not found"
+  input_error "Virarecon results directory ${3} not found"
 fi
 
-if [ ! -f $4 ];then
-  input_error "Quast info file:  ${4} not found"
-fi
 
 
 # Since this script outputs to STDOUT header lines has to be echoed
@@ -110,10 +105,16 @@ fi
 tmpDir=$(mktemp -d -p ./)
 
 
+
 jsonFile=${1}
 vocFile=${2}
-mosDir=${3}
-quastFile=${4}
+
+#This 2 dirs come from the last (third) parameter: path to viralrecon results dir.
+#realpath removes trailng "/"
+vrDir=$(realpath ${3})
+mosDir=$(echo "${3}/medaka/mosdepth/")
+quastFile=$(echo "${3}/medaka/quast/genome_stats/genome_info.txt")
+
 
 # Name of the main report file to output.
 baseName=$(basename ${jsonFile})
