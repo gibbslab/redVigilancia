@@ -13,7 +13,7 @@
 # 3) Path to nf-core/viralrecon results dir.
 #
 # OUTPUT:
-
+# Outputs a multiple fasta file with all consensus in run.
 # Outputs a tab separated file with the following content:
 #
 # S: Sample name
@@ -119,6 +119,7 @@ quastFile=$(echo "${3}/medaka/quast/genome_stats/genome_info.txt")
 # Name of the main report file to output.
 baseName=$(basename ${jsonFile})
 reportMainFile=$(echo ${tmpDir}/${baseName}".ins_report.tsv")
+consensusFile=$(echo ${tmpDir}/${baseName}".fasta")
 
 
 # User feed back.
@@ -330,6 +331,16 @@ done
   
 #mv report file un dir up. So it is visible to user.
 mv ${reportMainFile} .
+
+
+#--------------------------------------------------------------------
+# Get Consensus files and create a single multiple fasta file
+#
+#
+#--------------------------------------------------------------------
+echo "Gathering consensus files"
+cat ${vrDir}/medaka/*consensus* > ${consensusFile}
+mv ${consensusFile} .
 
 echo "Al samples analyzed."
 echo "Cleaning up."
