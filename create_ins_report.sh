@@ -67,10 +67,14 @@ function input_error ()
   #  create_ins_report.sh  [nextclade_output.json] [variants_file] [mosdepth-dir]  [quast-genome-info_file]
   #
   " 
-  exit 0
+  exit 1
 }
 
-
+#If fq is not installed just quit.
+if ! [ -x "$(command -v jq)" ]; then
+  echo 'Error:  jq is not installed. Please install it and try again.' >&2
+  exit 1
+fi
 
 
 if [ -z "$4" ]; then
