@@ -7,6 +7,11 @@
 #
 # Relies on "jq" for nextclade's JSON outputparsing.
 #
+
+#
+# In this new version all inputs come from a nf-core/viralrecon results dir.
+#
+
 # INPUT:
 # 1) Nextclade's output in .json format.
 # 2) A one column file holding a list of variants.
@@ -77,6 +82,7 @@ if ! [ -x "$(command -v jq)" ]; then
 fi
 
 
+#FALTA un argumento
 if [ -z "$4" ]; then
   input_error "Missing argument"
 fi
@@ -93,6 +99,7 @@ if [ ! -d $3 ] || [ -z "$3" ];then
   input_error "Mosdepth directory ${3} not found"
 fi
 
+#El archivo del 4to argumento no existe
 if [ ! -f $4 ];then
   input_error "Quast info file:  ${4} not found"
 fi
@@ -109,8 +116,11 @@ fi
 #Create a temp dir to hold tmp files
 tmpDir=$(mktemp -d -p ./)
 
+# Viralrecon results dir.
+# Real path supresses trailin "/"
+vrResults=$(realpath ${1})
 
-jsonFile=${1}
+jsonFile=$(echo "${vrResults}/medaka/nextclade/")
 vocFile=${2}
 mosDir=${3}
 quastFile=${4}
