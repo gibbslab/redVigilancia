@@ -112,7 +112,7 @@ vocFile=${2}
 #This 2 dirs come from the last (third) parameter: path to viralrecon results dir.
 #realpath removes trailng "/"
 vrDir=$(realpath ${3})
-mosDir=$(echo "${3}/medaka/mosdepth/")
+mosDir=$(echo "${3}/medaka/mosdepth/genome/")
 quastFile=$(echo "${3}/medaka/quast/genome_stats/genome_info.txt")
 
 
