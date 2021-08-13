@@ -4,7 +4,7 @@
 # This script runs nextclade over the fasta files and obtains that json file.
 #
 # INPUT:
-# Path to consensus viralrecon results dir.
+# Path to viralrecon results dir.
 # Run ID: user defined id for this run
 #
 # OUTPUT:
