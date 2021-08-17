@@ -11,24 +11,39 @@
 # json file.
 #
 # EXAMPLE COMMAND LINE:
-# run_offline_nextclade.sh [viralrecon_results_dir] [run_id]
+# run_offline_nextclade.sh [viralrecon_results_dir]
 #
 
+#Basic input check
+vReconResultsDir=${1}
 
-resultsDir=${1}
-runId=${2}
+if [ -z "$1" ];then
+  echo "Error: Missing argument. Provide a path to a valid viralrecon results dir"
+  exit 1
+fi  
+
+# Where to store results
+outputDir=$(echo "nextclade_output")
+
+#Do not overwrite directory
+if [ -d $outputDir ];then
+	echo "Directory $outputDir exists please rename it and run again."
+	exit 1
+fi
+
+
 
 nextCladeBin=$(echo "/home/apinzon/mis_datos/Analysis/20210721-vigilancia/tools/soft/nextclade/nextclade-Linux-x86_64")
-nextCladeFiles=$(echo "/home/apinzon/mis_datos/Analysis/20210721-vigilancia/data/other_data/nextclade/")
-consFileName=$(echo ${runId}".consensus.fasta")
-outputDir=$(echo ${runId}"_nextclade_output")
+nextCladeFiles="./nextclade-input/"
+#Create the NAME for multiple fasta file
+consFileName=$(echo "all.consensus.fasta")
+
 
 echo "Gathering consensus files:"
-cat ${resultsDir}/medaka/*consensus*  > ${consFileName}
+cat ${vReconResultsDir}/medaka/*consensus*  > ${consFileName}
 
 #Run nextclade
-
-${nextCladeBin} --input-fasta=${consFileName} --input-root-seq=${nextCladeFiles}reference.fasta --genes=E,M,N,ORF1a,ORF1b,ORF3a,ORF6,ORF7a,ORF7b,ORF8,ORF9b,S --input-gene-map=${nextCladeFiles}genemap.gff --input-tree=${nextCladeFiles}tree.json --input-qc-config=${nextCladeFiles}qc.json --input-pcr-primers=${nextCladeFiles}primers.csv --output-json=${outputDir}/${runId}_nextclade.json --output-csv=${outputDir}/${runId}_nextclade.csv --output-tsv=${outputDir}/${runId}_nextclade.tsv --output-tree=${outputDir}/${runId}_nextclade.auspice.json --output-dir=${outputDir}/ --output-basename=${2} 
+${nextCladeBin} --input-fasta=${consFileName} --input-root-seq=${nextCladeFiles}reference.fasta --genes=E,M,N,ORF1a,ORF1b,ORF3a,ORF6,ORF7a,ORF7b,ORF8,ORF9b,S --input-gene-map=${nextCladeFiles}genemap.gff --input-tree=${nextCladeFiles}tree.json --input-qc-config=${nextCladeFiles}qc.json --input-pcr-primers=${nextCladeFiles}primers.csv --output-json=${outputDir}_nextclade.json --output-csv=${outputDir}/nextclade.csv --output-tsv=${outputDir}/nextclade.tsv --output-tree=${outputDir}/nextclade.auspice.json --output-dir=${outputDir}/ --output-basename=vigilant
 
 #Clean up!
 mv ${consFileName} ${outputDir}
